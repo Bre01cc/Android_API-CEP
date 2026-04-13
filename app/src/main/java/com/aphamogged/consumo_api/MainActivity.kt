@@ -77,6 +77,10 @@ fun CepScreen(modifier: Modifier = Modifier) {
         mutableStateOf(listOf<Endereco>())
     }
 
+    var endereco by remember {
+        mutableStateOf(Endereco())
+    }
+
     Column(
         modifier = modifier.fillMaxWidth()
     ) {
@@ -118,7 +122,29 @@ fun CepScreen(modifier: Modifier = Modifier) {
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text(text = "Qual CEP está buscando?") },
                         trailingIcon = {
-                            IconButton(onClick = { /* TODO */ }) {
+                            IconButton(onClick = { /* TODO */
+                                ->
+                                var call =  RetrofitFactory().getEnderecoService().getEnderecoByCep(
+                                    cep = cepState
+                                )
+                                call.enqueue(object: Callback<Endereco>{
+                                    override fun onResponse(
+                                        call: Call<Endereco>,
+                                        response: Response<Endereco>
+                                    ) {
+
+                                        endereco = response.body()!!
+                                    }
+
+                                    override fun onFailure(
+                                        call: Call<Endereco>,
+                                        t: Throwable
+                                    ) {
+                                        Log.i("teste","${t.message}" )
+                                    }
+                                })
+
+                            }) {
                                 Icon(
                                     imageVector = Icons.Default.Search,
                                     contentDescription = ""
@@ -209,6 +235,9 @@ fun CepScreen(modifier: Modifier = Modifier) {
         ) {
             items(listaEndereco) {
                 CardEndereco(it)
+            }
+            item {
+                CardEndereco(endereco)
             }
         }
     }
