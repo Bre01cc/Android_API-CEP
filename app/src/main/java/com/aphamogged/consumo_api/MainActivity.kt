@@ -33,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +47,7 @@ import androidx.core.view.WindowInsetsAnimationCompat
 import com.aphamogged.consumo_api.model.Endereco
 import com.aphamogged.consumo_api.service.RetrofitFactory
 import com.aphamogged.consumo_api.ui.theme.Consumo_APITheme
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -77,6 +79,7 @@ fun CepScreen(modifier: Modifier = Modifier) {
         mutableStateOf(listOf<Endereco>())
     }
 
+    val scope = rememberCoroutineScope()
     var endereco by remember {
         mutableStateOf(Endereco())
     }
@@ -197,28 +200,35 @@ fun CepScreen(modifier: Modifier = Modifier) {
                     )
 
                     IconButton( onClick = {
-                        ->
-                        var call =  RetrofitFactory().getEnderecoService().getEnderecosByUfCidadeRua(
-                            uf = ufState,
-                            cidade = cidadeState,
-                            rua = ruaState
-                        )
-                        call.enqueue(object: Callback<List<Endereco>> {
-                            override fun onResponse(
-                                call: Call<List<Endereco>>,
-                                response: Response<List<Endereco>>
-                            ) {
-
-                                listaEndereco = response.body()!!
+                        scope.launch {
+                            try {
+                                var call =  RetrofitFactory().getEnderecoService().getEnderecosByUfCidadeRua(
+                                    uf = ufState,
+                                    cidade = cidadeState,
+                                    rua = ruaState
+                                )
+                            } catch (e: Exception){
+                                Log.e("Errro", e.message ?: "")
                             }
 
-                            override fun onFailure(
-                                call: Call<List<Endereco>>,
-                                t: Throwable
-                            ) {
-                                Log.i("teste","${t.message}" )
-                            }
-                        })
+                        }
+
+//                        call.enqueue(object: Callback<List<Endereco>> {
+//                            override fun onResponse(
+//                                call: Call<List<Endereco>>,
+//                                response: Response<List<Endereco>>
+//                            ) {
+//
+//                                listaEndereco = response.body()!!
+//                            }
+//
+//                            override fun onFailure(
+//                                call: Call<List<Endereco>>,
+//                                t: Throwable
+//                            ) {
+//                                Log.i("teste","${t.message}" )
+//                            }
+//                        })
 
                     } ) {
                         Icon(
